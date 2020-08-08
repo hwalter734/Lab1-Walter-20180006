@@ -1,0 +1,93 @@
+---
+title: "Lab 1"
+author: "Hans Walter"
+date: "8/6/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Cargar Librerías
+```{r cache=TRUE, message=FALSE, echo=TRUE, error=FALSE}
+library(dplyr)
+library(readr)
+library(tidyverse)
+library(readxl)
+```
+
+
+# Ejercicio 1 Parte 1
+Primero usamos la función *list.files* para que nos retorne un vector con los nombres de todos los archivos de excel
+del directorio. Hacemos un lapply para que lea de un solo todos los archivos y los almacene en una lista de dataframes.
+```{r echo=TRUE, cache=TRUE, message=FALSE}
+file_list <- list.files(pattern = '.xlsx')
+df_list <- lapply(file_list, read_excel)
+```
+
+## Ejercicio 1 Parte 2
+Para aplicarle el nombre correcto a cada dataframe, eliminamos la extensión ".xlsx" de cada nombre del vector
+original **file_list** y almacenamos el resultado en **nombres_dataframes**. Aplicamos los nombres a la lista
+de dataframes.
+```{r echo = TRUE, cache=TRUE}
+nombres_dataframes <- str_remove_all(file_list, ".xlsx")
+names(df_list) <- nombres_dataframes
+```
+
+## Ejercicio 1 Parte 3
+Usamos la función *Map* que va a agregar una nueva columna en cada dataframe de la lista, y
+va a asignarle la fecha que le corresponde por posición. Es decir, en la posición uno del vector
+de **nombres_dataframes** tiene "01-2018", este lo va a asignar a cada fila del primer data frame,
+y así consecutivamente con los demás dataframes.
+```{r echo=TRUE, cache=TRUE, warning= FALSE, message=FALSE}
+df_nueva <- Map(cbind, df_list, Fecha = nombres_dataframes)
+df_nueva2 <- bind_rows(df_nueva)
+df_final <- subset(df_nueva2, select = -c(TIPO, ...10))
+head(df_final)
+```
+
+## Ejercicio 1 Parte 4
+Exportamos el archivo Excel con todas las correciones hechas.
+```{r echo=TRUE}
+archivo_nuevo <- writexl::write_xlsx(df_final, "embotelladora.xlsx")
+```
+
+# Ejercicio 2
+Creamos 3 vectores, con un tamaño de 20 números y que escoga aleatoriamente entre un rango de 1 a 20. 
+Dejamos replace TRUE para que puedan repetirse números dentro del vector. Finalmente almacenamos los 3 vectores
+en una lista
+```{r echo=TRUE}
+vector1 <- sample(1:20, size = 20, replace = TRUE)
+vector2 <- sample(1:20, size = 20, replace = TRUE)
+vector3 <- sample(1:20, size = 20, replace = TRUE)
+lista_vectores <- list(vector1, vector2, vector3)
+```
+
+## Función de Moda
+```{r echo=TRUE}
+moda <- function(x){
+  y <- table(x)
+  z <- data.frame(y)
+  colnames(z) <- c("Número", "Frequencia")
+  resp <- z[which.max(z$Frequencia),]
+  return(resp)
+}
+```
+
+## Resultado
+```{r echo=TRUE}
+resultado <- lapply(lista_vectores, moda)
+resultado
+```
+
+
+# Ejercicio 3
+Descargamos el dataset de la página de la SAT, previamente a realizar el código se analizó el texto
+para ver que delimitador se tenía que utilizar.
+```{r echo=TRUE, warning=FALSE, message=FALSE}
+parque <- readr::read_delim("pvj2020.txt", delim = "|")
+head(parque)
+```
+
+
